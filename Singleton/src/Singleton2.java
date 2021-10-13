@@ -1,6 +1,6 @@
 public class Singleton2 {
     private Singleton2(){}
-    private static Singleton2 singleton2 = null;
+    private volatile static Singleton2 singleton2 = null;
     public static Singleton2 getInstance() {
         if (singleton2 == null) {
             synchronized (Singleton2.class) {
@@ -23,4 +23,15 @@ public class Singleton2 {
 *
 * 加锁是为了线程安全
 * 双重判断的1号判断是为了“不用每次都加锁”；2号判断是为了“防止创建两个实例”
+*
+* volatile的作用：防止指令重排
+* 因"singleton2 = new Singleton2()"这条语句可以分为三步：
+*   1、为singleton2分配内存空间
+*   2、初始化singleton2
+*   3、将singleton2指向分配的内存空间
+* 由于jvm可能指令重排为1-3-2，单线程下无问题，但是多线程下会导致一个线程获得一个未初始化的实例。
+* 例如，线程T1执行了1和3，此时T2线程调用getInstance()后发现singleton2不为空，因此返回singleton2，但此时
+* singleton2还没有被初始化，所以需要使用volatile来禁止指令重排
+*
+* 参考：https://www.cnblogs.com/Icarus-/p/13782623.html
 * */
